@@ -1,8 +1,14 @@
 import { defineConfig } from "vite";
 
-import { default as defaultConfig } from "./default.config";
+import path from "node:path";
+import { manualDeps } from "./utils";
 
-import type { VITE_EXPORT_PARAMS } from "./types.config";
+import defaultConfig from "./default.config";
+import { compilerOptions } from "../tsconfig.json";
+
+import packageJson from "../package.json";
+
+import type { VITE_EXPORT_PARAMS } from "./types";
 
 export default (params: VITE_EXPORT_PARAMS) =>
   defineConfig({
@@ -10,10 +16,13 @@ export default (params: VITE_EXPORT_PARAMS) =>
     base: "/",
     build: {
       sourcemap: false,
-      cssCodeSplit: true,
+      cssCodeSplit: !params.mode.includes("insertcss"),
+      assetsInlineLimit: params.mode.includes("insertcss") ? 0 : undefined,
       cssMinify: "lightningcss",
+      outDir: compilerOptions.outDir,
       minify: "terser",
       manifest: false,
+      reportCompressedSize: true,
       terserOptions: {
         maxWorkers: 2,
         compress: {
@@ -26,14 +35,19 @@ export default (params: VITE_EXPORT_PARAMS) =>
         },
       },
       rollupOptions: {
+        treeshake: true,
         output: {
-          chunkFileNames: "js/[hash].js",
-          entryFileNames: "js/[hash].js",
+          experimentalMinChunkSize: 15_000,
+          entryFileNames: "js/[name].[hash].js",
+          chunkFileNames: "js/[name].[hash].js",
           assetFileNames: (opt) => {
-            const [[, ext]] = Array.from(
-              opt!.name!.matchAll(/.([0-9-a-z]+)$/g),
-            );
-            return `${ext}/[hash].${ext}`;
+            const ext = path.extname(opt?.name || "").slice(1);
+            return ext ? `${ext}/[name].[hash].${ext}` : "assets/[name].[hash]";
+          },
+          manualChunks: {
+            vendor: [
+              ...manualDeps(packageJson.dependencies, []),
+            ],
           },
         },
       },

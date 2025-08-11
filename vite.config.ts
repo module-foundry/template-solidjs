@@ -1,13 +1,12 @@
 import { defineConfig } from "vite";
 
-export default defineConfig(({ command, mode }) => {
-  const isProd = command === "build";
+import type { BuildMode } from "./vite/types";
 
-  if (isProd) {
-    // eslint-disable-next-line no-undef
-    return require("./vite/prod.config").default({ mode });
-  }
+export default defineConfig(async ({ mode, command }) => {
+  const configModule =
+    command === "build"
+      ? await import("./vite/prod.config")
+      : await import("./vite/dev.config");
 
-  // eslint-disable-next-line no-undef
-  return require("./vite/dev.config").default({ mode });
+  return configModule.default({ mode: mode as BuildMode });
 });

@@ -1,15 +1,15 @@
 import { defineConfig } from "vite";
 
-import { default as defaultConfig } from "./default.config";
+import defaultConfig from "./default.config";
 
-import type { VITE_EXPORT_PARAMS } from "./types.config";
+import type { VITE_EXPORT_PARAMS } from "./types";
 
 export default (params: VITE_EXPORT_PARAMS) =>
   defineConfig({
     ...defaultConfig(params),
     build: {
       target: "esnext",
-      sourcemap: true,
+      sourcemap: false,
       minify: false,
       cssCodeSplit: false,
     },
