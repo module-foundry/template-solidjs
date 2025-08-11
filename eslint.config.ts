@@ -15,6 +15,8 @@ import importPlugin from "eslint-plugin-import";
 import unicorn from "eslint-plugin-unicorn";
 
 export default defineConfig([
+  prettier,
+  ...fixupConfigRules(jsxA11y.flatConfigs.recommended),
   {
     files: ["**/*.{js,mjs,cjs}"],
     languageOptions: { globals: globals.browser },
@@ -54,7 +56,11 @@ export default defineConfig([
         { checksVoidReturn: false },
       ],
       "@typescript-eslint/no-unsafe-member-access": "error",
-      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-console": "error",
+      "no-debugger": "error",
+      "no-alert": "error",
+      "default-param-last": "off",
+      "@typescript-eslint/default-param-last": "error",
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-floating-promises": "error",
       "unicorn/prefer-optional-catch-binding": "error",
@@ -62,7 +68,7 @@ export default defineConfig([
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/prefer-readonly": "error",
       "@typescript-eslint/no-unsafe-call": "error",
-      "arrow-body-style": ["error", "as-needed"],
+      "arrow-body-style": ["off"],
       "unicorn/prefer-top-level-await": "error",
       "solid/no-react-specific-props": "error",
       "unicorn/explicit-length-check": "error",
@@ -84,13 +90,26 @@ export default defineConfig([
       "no-implied-eval": "error",
       "prefer-template": "error",
       "no-return-await": "error",
-      "prefer-const": "error",
-      "no-alert": "error",
       "no-eval": "error",
       "no-var": "error",
+      "no-undef": "error",
+      complexity: ["warn", 8],
+      "max-depth": ["warn", 4],
+      "max-lines": ["warn", 300],
+      "max-params": ["warn", 4],
+      "max-statements": ["warn", 20],
+      "prefer-const": ["error", { destructuring: "all" }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          vars: "all",
+          args: "after-used",
+          ignoreRestSiblings: false,
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+        },
+      ],
     },
   },
-
-  prettier,
-  ...fixupConfigRules(jsxA11y.flatConfigs.recommended),
+  { ignores: ["./*", "!./src", "!./public"] },
 ]);
