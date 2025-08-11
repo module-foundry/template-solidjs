@@ -1,6 +1,13 @@
+.idea
+.code
+.vscode
+.vs
+.tanstack
+.vite
+.env
 build
 dist
-.idea
 node_modules
-.env
 README.md
+LICENSE
+repository

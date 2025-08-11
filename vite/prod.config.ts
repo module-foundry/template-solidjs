@@ -37,6 +37,7 @@ export default (params: VITE_EXPORT_PARAMS) =>
       rollupOptions: {
         treeshake: true,
         output: {
+          inlineDynamicImports: false,
           experimentalMinChunkSize: 15_000,
           entryFileNames: "js/[name].[hash].js",
           chunkFileNames: "js/[name].[hash].js",
@@ -44,11 +45,11 @@ export default (params: VITE_EXPORT_PARAMS) =>
             const ext = path.extname(opt?.name || "").slice(1);
             return ext ? `${ext}/[name].[hash].${ext}` : "assets/[name].[hash]";
           },
-          manualChunks: {
+          manualChunks: !params.mode.includes("insertcss") ? {
             vendor: [
               ...manualDeps(packageJson.dependencies, []),
             ],
-          },
+          } : undefined,
         },
       },
     },

@@ -1,28 +1,29 @@
-import { createMemo, createSignal } from "solid-js";
-import { flatten, translator } from "@solid-primitives/i18n";
+import { createSignal, createMemo } from "solid-js";
+import { translator, flatten } from "@solid-primitives/i18n";
 
 import { dictionaries, type Locales } from "./locales";
 
 const [locale, setLocale] = createSignal<Locales>("en");
 
-const parseLocale = () => {
+const parseLocale = (): void => {
   const localStorageKey = localStorage.getItem("t") as Locales | null;
   if (localStorageKey) {
     setLocale(localStorageKey);
   }
 };
 
-const updateLocale = (lang: Locales) => {
+const updateLocale = (lang: Locales): void => {
   localStorage.setItem("t", lang);
   setLocale(lang);
 };
 
 const dict = createMemo(() => flatten(dictionaries[locale()]));
 
+// eslint-disable-next-line solid/reactivity
 const t = translator(dict);
 
 export const i18n = {
-  t,
-  parseLocale,
   updateLocale,
+  parseLocale,
+  t,
 };

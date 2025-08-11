@@ -6,5 +6,5 @@ export const dictionaries = {
   ru: ruDict,
 };
 
-export type Dict = typeof enDict;
 export type Locales = keyof typeof dictionaries;
+export type Dict = typeof enDict;

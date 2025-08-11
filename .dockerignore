@@ -1,0 +1,12 @@
+.idea
+.code
+.vscode
+.vs
+.tanstack
+.vite
+build
+dist
+node_modules
+README.md
+LICENSE
+repository

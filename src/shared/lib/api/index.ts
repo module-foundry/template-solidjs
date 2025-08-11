@@ -5,8 +5,6 @@ import { API_URL } from "@/shared/config";
 const headers: Record<string, string> = {};
 
 export const api = ky.create({
-  prefixUrl: import.meta.env.VITE_API_URL || API_URL,
-  headers,
   hooks: {
     beforeRequest: [
       // (request) => {
@@ -24,4 +22,6 @@ export const api = ky.create({
       // },
     ],
   },
+  prefixUrl: import.meta.env.VITE_API_URL || API_URL,
+  headers,
 });

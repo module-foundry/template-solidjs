@@ -1,5 +1,5 @@
 /* @refresh reload */
-import "./styles/index.sass";
+import "./styles/main.sass";
 
 import { render } from "solid-js/web";
 import { i18n } from "@/shared/lib";
