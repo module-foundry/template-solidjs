@@ -1,4 +1,4 @@
-import { Home } from "@/pages";
+import { Home } from "@/pages/home";
 
 import { type RouteDefinition } from "@solidjs/router";
 

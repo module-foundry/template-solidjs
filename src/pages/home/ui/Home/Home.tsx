@@ -1,5 +1,5 @@
 import { Component, JSX } from "solid-js";
-import { i18n } from "@/shared/lib";
+import { i18n } from "@/shared/i18n";
 
 interface HomeProps extends JSX.HTMLAttributes<HTMLElement> {}
 
