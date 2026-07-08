@@ -1,42 +1,38 @@
-// vite/default.config.ts
 import { fileURLToPath } from "node:url";
 import { InlineConfig } from "vite";
-
-import { normalizeFlags } from "./utils";
 
 import solid from "vite-plugin-solid";
 import svgr from "vite-plugin-svgr";
 import tsPaths from "vite-tsconfig-paths";
 import { compression } from "vite-plugin-compression2";
 import { analyzer } from "vite-bundle-analyzer";
-import { viteSingleFile } from "vite-plugin-singlefile";
 import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 import { ViteMinifyPlugin } from "vite-plugin-minify";
-import autoprefixer from "autoprefixer";
-import cssnano from "cssnano";
+import browserslist from "browserslist";
+import { browserslistToTargets } from "lightningcss";
 
-import type { VITE_EXPORT_PARAMS } from "./types";
+import { envGuardPlugin } from "./plugins/env-guard.plugin";
 
-export default (params: VITE_EXPORT_PARAMS): InlineConfig => {
-  const flags = normalizeFlags(params.mode);
+export default (): InlineConfig => {
+  const isCompress = process.env.BUILD_COMPRESS === "true";
+  const isAnalyze = process.env.BUILD_ANALYZE === "true";
 
   const plugins = [
+    envGuardPlugin(),
     tsPaths(),
     solid(),
     svgr(),
     ViteImageOptimizer(),
     ViteMinifyPlugin(),
-    flags.inlineCss &&
-      viteSingleFile({
-        inlinePattern: ["**/*.css"],
-      }),
-    flags.compress &&
+    isCompress &&
       compression({
         algorithms: ["gzip", "brotliCompress"],
         deleteOriginalAssets: false,
-        include: /\.(xml|css|json|js|ts|mjs|svg|yaml|yml|toml)$/,
+        include:
+          /\.(xml|css|json|js|ts|mjs|svg|yaml|yml|toml|html|txt|woff|woff2|ttf|eot)$/,
+        threshold: 0,
       }),
-    flags.analyze && analyzer(),
+    isAnalyze && analyzer(),
   ].filter(Boolean);
 
   return {
@@ -49,8 +45,11 @@ export default (params: VITE_EXPORT_PARAMS): InlineConfig => {
       },
     },
     css: {
-      postcss: {
-        plugins: [autoprefixer(), cssnano()],
+      transformer: "lightningcss",
+      lightningcss: {
+        targets: browserslistToTargets(
+          browserslist(undefined, { env: "production" }),
+        ),
       },
     },
   };

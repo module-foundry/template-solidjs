@@ -1,19 +1,26 @@
 import { createSignal, createMemo } from "solid-js";
 import { translator, flatten } from "@solid-primitives/i18n";
 
+import { env } from "@/shared/config";
+
 import { dictionaries, type Locales } from "./locales";
 
-const [locale, setLocale] = createSignal<Locales>("en");
+const [locale, setLocale] = createSignal<Locales>(
+  env.VITE_I18N_FALLBACK_LNG as Locales,
+);
 
 const parseLocale = (): void => {
-  const localStorageKey = localStorage.getItem("t") as Locales | null;
+  const localStorageKey = localStorage.getItem(
+    env.VITE_I18N_STORAGE_KEY,
+  ) as Locales | null;
+
   if (localStorageKey) {
     setLocale(localStorageKey);
   }
 };
 
 const updateLocale = (lang: Locales): void => {
-  localStorage.setItem("t", lang);
+  localStorage.setItem(env.VITE_I18N_STORAGE_KEY, lang);
   setLocale(lang);
 };
 

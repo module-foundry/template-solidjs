@@ -1,1 +1,1 @@
-npx lint-staged && steiger --fail-on-warnings=0 ./src
+pnpm exec lint-staged && pnpm run validate:steiger

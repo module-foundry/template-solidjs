@@ -2,12 +2,17 @@
 .code
 .vscode
 .vs
+.cursor
 .tanstack
 .vite
 .env
+.env.*
 build
 dist
 node_modules
+coverage
+pnpm-lock.yaml
 README.md
 LICENSE
 repository
+*.min.js

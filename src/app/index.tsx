@@ -4,7 +4,7 @@ import "./styles/main.sass";
 import { render } from "solid-js/web";
 import { i18n } from "@/shared/i18n";
 
-import App from "./App";
+import App from "./app";
 
 const root = document.getElementById("root");
 
