@@ -38,6 +38,7 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\"",
+    "rename:src-files": "node scripts/rename-src-files.js",
     "commitlint": "commitlint --edit"
   },
   "devDependencies": {
