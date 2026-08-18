@@ -12,6 +12,19 @@ $ npm install # or pnpm install or yarn install
 
 ## Available Scripts
 
+### `pnpm api:generate`
+
+Generates a typed API client from the OpenAPI document configured by
+`OPENAPI_URL` in `.env`. The generated client uses Solid Query with the native
+Fetch API transport and is written to `src/shared/api/generated`.
+
+Use generated query and mutation primitives for API operations. Keep manual
+code in `shared/api` limited to transport concerns such as authentication and
+error normalization.
+
+Use `pnpm api:watch` to regenerate the client when a local OpenAPI document
+changes.
+
 In the project directory, you can run:
 
 ### `npm run dev` or `npm start`

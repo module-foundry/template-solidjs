@@ -1,6 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-
 import { loadEnv, type Plugin } from "vite";
 
 const ENV_FILE_PATH = "src/shared/config/env.ts";
@@ -9,15 +8,19 @@ const VITE_BUILT_IN_KEYS = new Set(["BASE_URL", "DEV", "MODE", "PROD", "SSR"]);
 const getRequiredEnvKeys = (envFile: string): string[] =>
   [
     ...new Set(
-      [...envFile.matchAll(/import\.meta\.env\.([A-Z0-9_]+)/gu)]
-        .map((match) => match[1])
-        .filter((key) => !VITE_BUILT_IN_KEYS.has(key)),
+      [...envFile.matchAll(/import\.meta\.env\.([A-Z0-9_]+)/gu)].flatMap(
+        (match) => {
+          const key = match[1];
+
+          return key && !VITE_BUILT_IN_KEYS.has(key) ? [key] : [];
+        },
+      ),
     ),
   ].sort();
 
 export const envGuardPlugin = (): Plugin => ({
-  name: "env-guard",
   enforce: "pre",
+  name: "env-guard",
   config: (_, { mode }) => {
     const envFilePath = resolve(process.cwd(), ENV_FILE_PATH);
 
@@ -28,6 +31,7 @@ export const envGuardPlugin = (): Plugin => ({
     }
 
     const requiredKeys = getRequiredEnvKeys(readFileSync(envFilePath, "utf8"));
+
     if (requiredKeys.length === 0) {
       throw new Error(`No import.meta.env keys found in ${ENV_FILE_PATH}.`);
     }

@@ -3,6 +3,7 @@
 .vscode
 .vs
 .cursor
+.codex
 .tanstack
 .vite
 .env
@@ -13,6 +14,7 @@ node_modules
 coverage
 pnpm-lock.yaml
 README.md
+AGENTS.md
 LICENSE
 repository
 *.min.js

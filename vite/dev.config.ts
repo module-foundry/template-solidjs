@@ -5,16 +5,16 @@ import defaultConfig from "./default.config";
 export default () =>
   defineConfig({
     ...defaultConfig(),
-    build: {
-      target: "esnext",
-      sourcemap: true,
-      minify: false,
-      cssCodeSplit: false,
-    },
     server: {
+      hmr: true,
+      open: true,
       port: 3000,
       strictPort: true,
-      open: true,
-      hmr: true,
+    },
+    build: {
+      minify: false,
+      sourcemap: true,
+      target: "esnext",
+      cssCodeSplit: false,
     },
   });

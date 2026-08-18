@@ -598,6 +598,26 @@ shared/api/types.ts
 
 Domain endpoints must not live in `shared/api`.
 
+Generated OpenAPI transport artifacts are the exception to this ownership
+rule. Orval output belongs in `shared/api/generated` because it is generated
+infrastructure, not a hand-written domain slice.
+
+### Generated API usage
+
+- Treat the OpenAPI document and Orval output as the source of truth for API
+  operations and transport DTOs.
+- Run `pnpm api:generate` after the OpenAPI document changes.
+- Never edit files under `shared/api/generated` manually.
+- Use generated Solid Query primitives and generated request functions instead
+  of duplicating endpoints with `fetch`, `apiRequest`, or another HTTP client.
+- Import generated operations into the owning `entities/<slice>/api` or
+  `features/<slice>/api` segment. Re-export only the slice contract through the
+  slice root `index.ts`.
+- Add a hand-written entity or feature API wrapper only when domain mapping,
+  validation, query invalidation, or composition is required.
+- Keep `shared/api/index.ts` limited to the Orval fetch mutator, authentication,
+  normalized transport errors, and generic transport types.
+
 Preferred API structure:
 
 ```txt

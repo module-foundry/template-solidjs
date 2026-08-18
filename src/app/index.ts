@@ -1,7 +1,8 @@
 /* @refresh reload */
-import "./styles/main.sass";
+import "./styles/main.scss";
 
 import { render } from "solid-js/web";
+
 import { i18n } from "@/shared/i18n";
 
 import App from "./app";
@@ -15,4 +16,4 @@ if (!(root instanceof HTMLElement)) {
 }
 
 i18n.parseLocale();
-render(() => <App />, root);
+render(App, root);

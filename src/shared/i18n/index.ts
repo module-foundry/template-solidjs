@@ -1,5 +1,5 @@
-import { createSignal, createMemo } from "solid-js";
-import { translator, flatten } from "@solid-primitives/i18n";
+import { createMemo, createSignal } from "solid-js";
+import { flatten, translator } from "@solid-primitives/i18n";
 
 import { env } from "@/shared/config";
 
@@ -26,11 +26,11 @@ const updateLocale = (lang: Locales): void => {
 
 const dict = createMemo(() => flatten(dictionaries[locale()]));
 
-// eslint-disable-next-line solid/reactivity
+// eslint-disable-next-line solid/reactivity -- The translator reads the reactive accessor lazily.
 const t = translator(dict);
 
 export const i18n = {
-  updateLocale,
-  parseLocale,
   t,
+  parseLocale,
+  updateLocale,
 };

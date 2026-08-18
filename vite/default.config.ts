@@ -1,15 +1,13 @@
-import { fileURLToPath } from "node:url";
-import { InlineConfig } from "vite";
-
-import solid from "vite-plugin-solid";
-import svgr from "vite-plugin-svgr";
-import tsPaths from "vite-tsconfig-paths";
-import { compression } from "vite-plugin-compression2";
-import { analyzer } from "vite-bundle-analyzer";
-import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
-import { ViteMinifyPlugin } from "vite-plugin-minify";
 import browserslist from "browserslist";
 import { browserslistToTargets } from "lightningcss";
+import { fileURLToPath } from "node:url";
+import { type InlineConfig } from "vite";
+import { analyzer } from "vite-bundle-analyzer";
+import { compression } from "vite-plugin-compression2";
+import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
+import { ViteMinifyPlugin } from "vite-plugin-minify";
+import solid from "vite-plugin-solid";
+import svgr from "vite-plugin-svgr";
 
 import { envGuardPlugin } from "./plugins/env-guard.plugin";
 
@@ -19,28 +17,28 @@ export default (): InlineConfig => {
 
   const plugins = [
     envGuardPlugin(),
-    tsPaths(),
     solid(),
     svgr(),
     ViteImageOptimizer(),
     ViteMinifyPlugin(),
     isCompress &&
       compression({
-        algorithms: ["gzip", "brotliCompress"],
+        threshold: 0,
         deleteOriginalAssets: false,
+        algorithms: ["gzip", "brotliCompress"],
         include:
           /\.(xml|css|json|js|ts|mjs|svg|yaml|yml|toml|html|txt|woff|woff2|ttf|eot)$/,
-        threshold: 0,
       }),
     isAnalyze && analyzer(),
   ].filter(Boolean);
 
   return {
+    plugins,
     appType: "spa",
     publicDir: "public",
-    plugins,
     resolve: {
       alias: {
+        "@": fileURLToPath(new URL("../src", import.meta.url)),
         "~": fileURLToPath(new URL("../src/shared/styles", import.meta.url)),
       },
     },
