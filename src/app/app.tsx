@@ -1,7 +1,7 @@
 import { Router } from "@solidjs/router";
 import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
 
-import { routes } from "./router";
+import { routes } from "./routes";
 
 const queryClient = new QueryClient();
 

@@ -5,9 +5,7 @@ import { env } from "@/shared/config";
 
 import { dictionaries, type Locales } from "./locales";
 
-const [locale, setLocale] = createSignal<Locales>(
-  env.VITE_I18N_FALLBACK_LNG as Locales,
-);
+const [locale, setLocale] = createSignal<Locales>(env.VITE_I18N_FALLBACK_LNG);
 
 const parseLocale = (): void => {
   const localStorageKey = localStorage.getItem(

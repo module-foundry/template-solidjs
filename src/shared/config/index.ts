@@ -1,2 +1,2 @@
-export * from "./i18n";
-export * from "./env";
+export { env } from "./env";
+export { LOCALES } from "./i18n";

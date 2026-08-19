@@ -10,6 +10,15 @@ $ npm install # or pnpm install or yarn install
 
 ### Learn more on the [Solid Website](https://solidjs.com) and come chat with us on our [Discord](https://discord.com/invite/solidjs)
 
+## Architecture
+
+The template uses pages-first Feature-Sliced Design. Only layers with real
+responsibilities are kept in the repository; `widgets`, `features`, and
+`entities` are introduced when a product provides concrete owners for them.
+
+See [`docs/architecture/fsd.md`](docs/architecture/fsd.md) for layer criteria,
+dependency rules, public APIs, and the extraction strategy.
+
 ## Available Scripts
 
 ### `pnpm api:generate`

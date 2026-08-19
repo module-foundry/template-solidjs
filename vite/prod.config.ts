@@ -1,3 +1,4 @@
+import generateScopedName from "mini-css-class-name/postcss-modules";
 import path from "node:path";
 import { defineConfig } from "vite";
 
@@ -5,10 +6,19 @@ import defaultConfig from "./default.config";
 
 import { compilerOptions } from "../tsconfig.json";
 
-export default () =>
-  defineConfig({
-    ...defaultConfig(),
+export default () => {
+  const baseConfig = defaultConfig();
+
+  return defineConfig({
+    ...baseConfig,
     base: "/",
+    css: {
+      ...baseConfig.css,
+      transformer: "postcss",
+      modules: {
+        generateScopedName: generateScopedName(),
+      },
+    },
     build: {
       manifest: false,
       minify: "terser",
@@ -45,3 +55,4 @@ export default () =>
       },
     },
   });
+};

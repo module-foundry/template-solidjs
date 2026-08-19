@@ -9,14 +9,11 @@ import { ViteMinifyPlugin } from "vite-plugin-minify";
 import solid from "vite-plugin-solid";
 import svgr from "vite-plugin-svgr";
 
-import { envGuardPlugin } from "./plugins/env-guard.plugin";
-
 export default (): InlineConfig => {
   const isCompress = process.env.BUILD_COMPRESS === "true";
   const isAnalyze = process.env.BUILD_ANALYZE === "true";
 
   const plugins = [
-    envGuardPlugin(),
     solid(),
     svgr(),
     ViteImageOptimizer(),
@@ -39,7 +36,6 @@ export default (): InlineConfig => {
     resolve: {
       alias: {
         "@": fileURLToPath(new URL("../src", import.meta.url)),
-        "~": fileURLToPath(new URL("../src/shared/styles", import.meta.url)),
       },
     },
     css: {

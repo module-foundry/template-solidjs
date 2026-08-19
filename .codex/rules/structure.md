@@ -1,1136 +1,166 @@
-# Structure usage
+# Architecture and structure rules
 
-## Goal
+## Source of truth
 
-Use this rule to decide where every new file belongs, when to create a new slice, how to structure files inside a slice, and how to safely update, move, or delete existing files.
+This repository uses Feature-Sliced Design with a **pages-first, extract-by-real-responsibility** strategy. Read `docs/architecture/fsd.md` before structural changes. That document is the detailed source of truth; this file is the operational checklist for day-to-day work.
 
-The project follows Feature-Sliced Design. Keep code as close as possible to its real owner. Do not create architecture for a hypothetical future use case.
+## Active architecture
 
-## Before changing files
+The currently active dependency chain is:
 
-Before adding, moving, or deleting code, inspect the existing structure first.
-
-1. Search for an existing owner slice.
-2. Check whether similar logic already exists.
-3. Prefer extending the existing slice over creating a new one.
-4. Create a new file only when the code has a clear responsibility.
-5. Create a new folder only when there are at least two meaningful files or the folder is required by this rule.
-6. Do not add placeholder files, empty abstractions, or folders “for later”.
-
-If the owner is unclear, keep the code closer to the current usage site until reuse or domain ownership becomes obvious.
-
-## Architecture
-
-Before adding new code, ask the questions in order. The first matching answer defines the layer.
-
-1. **App** — is this app init, routing, providers, global styles, or app-wide config? → `app/`
-2. **Pages** — is this a full page/screen for one route/URL? → `pages/`
-3. **Widgets** — is this a large self-contained UI block used on multiple pages or one of several such blocks on one page? → `widgets/`
-4. **Features** — is this a user action with business value, reused in different places: form, action button, modal flow, mutation, interaction scenario? → `features/`
-5. **Entities** — is this a business entity from the domain: model, domain representation, reusable entity UI, entity API, entity store? → `entities/`
-6. **Shared** — is this not business-bound: UI kit, utilities, base API client, config, i18n, generic hooks? → `shared/`
-
-If none fit, clarify the boundary. Do not bloat `entities/`. Non-reused code can stay inside a page.
-
-Imports only go down:
-
-```txt
-app → pages → widgets → features → entities → shared
+```text
+app -> pages -> shared
 ```
 
-A layer must not import from a higher layer. Slices on the same layer must not import from each other directly. Compose them from a higher layer instead.
+The complete set of allowed layers is:
+
+```text
+app -> pages -> widgets -> features -> entities -> shared
+```
+
+`widgets`, `features`, and `entities` are optional. Do not create them, their slices, or placeholder directories until the codebase has a real owner for them. Never add a `processes` layer.
+
+Dependencies only point from a higher layer to a lower layer. `shared` must never import from a business layer. Slices on the same layer are independent by default.
+
+## Classify before creating or moving code
+
+Ask these questions in order:
+
+1. Is it application startup, routing, providers, global styles, or build-time app configuration? Put it in `app`.
+2. Is it specific to one route or screen? Keep it in `pages/<page>`.
+3. Is it a large, independently meaningful UI composition reused on several pages, or one of several autonomous blocks on a page? Consider `widgets/<widget>`.
+4. Is it a meaningful user-facing business capability with its own logic, state, validation, API, or lifecycle? Consider `features/<feature>`.
+5. Is it a stable domain concept with independent ownership or genuine reuse? Consider `entities/<entity>`.
+6. Is it domain-agnostic infrastructure, UI, configuration, or a technical primitive? Put it in `shared`.
+
+If ownership is unclear, keep the code at the current page or usage site. A large file, a business-sounding noun, local state, or hypothetical future reuse is not enough reason to extract a slice.
 
 ## Layer responsibilities
 
-### `app/`
+### `app`
 
-Use `app/` only for application-level composition:
+Use for application composition only:
 
-- routing setup;
-- providers;
-- app initialization;
+- entry point and root component;
+- router configuration;
+- providers and initialization;
 - global styles;
-- app-wide configuration;
-- root layouts and error boundaries if they belong to the application shell.
+- application-wide boundaries.
 
-Do not put domain state, entity API, feature API, or business logic into `app/`.
+Do not place page UI, domain models, or business actions in `app`.
 
-`app/` must not use a `model/` segment. If a local schema is needed for an app component, place `*.schema.ts` next to the related `.tsx` file.
+### `pages`
 
-### `pages/`
+Each slice represents one route or screen. A page may own route-specific `ui`, `model`, `api`, `lib`, and `config` code. Keep that code local even when it is large or contains state, requests, or hooks.
 
-Use `pages/` for route-level screens.
+Extract code only after a stable lower-layer responsibility exists. Page-local API code must not be reused by another page; move reusable domain reads to an entity and meaningful reusable mutations to a feature.
 
-A page may:
+### `widgets`
 
-- compose widgets, features, entities, and shared UI;
-- prepare page-level layout;
-- read route params/search params;
-- connect route-level framework props to lower-level components.
+Create a widget only for a large autonomous UI composition that is reused across pages, or is one of several independently meaningful blocks on a complex page. Buttons, fields, avatars, titles, and one-page sections are not widgets by default.
 
-A page must not own domain API or domain store.
+### `features`
 
-Allowed:
+Create a feature for a meaningful user capability such as sign-in, add-to-cart, or change-password when it has independent logic/lifecycle or real reuse. Do not create features for generic clicks, modal visibility, tabs, toggles, or callbacks.
 
-```txt
-pages/<page-slice>/ui/<page-name>/<page-name>.tsx
-pages/<page-slice>/model/schemas/<page-name>.schema.ts
-pages/<page-slice>/model/constants.ts
-pages/<page-slice>/index.ts
-```
+### `entities`
 
-Forbidden in `pages/`:
+Create an entity for a stable domain concept such as user, product, or order when it has independent ownership, reusable domain logic, API, state, or UI representation. Do not create an entity merely because a noun appears in the UI.
 
-```txt
-pages/<page-slice>/api/
-pages/<page-slice>/model/store.ts
-pages/<page-slice>/model/index.ts
-```
+### `shared`
 
-If a page needs data, move data ownership to an `entities/` or `features/` slice and import it through the public API.
+Keep `shared` domain-agnostic. Valid responsibilities in this repository include:
 
-### `widgets/`
+- `shared/api`: transport, authentication, normalized errors, generated transport code;
+- `shared/config`: environment and cross-cutting static configuration;
+- `shared/i18n`: generic localization runtime and dictionaries;
+- `shared/ui`: genuinely reusable UI primitives, when any exist;
+- `shared/lib`: focused technical utilities, when any exist.
 
-Use `widgets/` for large self-contained UI blocks.
+Do not use generic dump directories such as `helpers`, `utils`, `hooks`, `types`, `components`, or `constants` without a focused responsibility.
 
-A widget may:
+## Slices and segments
 
-- compose features, entities, and shared UI;
-- contain widget-specific presentation logic;
-- contain local UI schemas and constants.
+Use kebab-case for slice names. A slice may contain semantic segments such as:
 
-A widget must not own domain API or domain store.
-
-Allowed:
-
-```txt
-widgets/<widget-slice>/ui/<widget-name>/<widget-name>.tsx
-widgets/<widget-slice>/model/schemas/<widget-name>.schema.ts
-widgets/<widget-slice>/model/constants.ts
-widgets/<widget-slice>/index.ts
-```
-
-Forbidden in `widgets/`:
-
-```txt
-widgets/<widget-slice>/api/
-widgets/<widget-slice>/model/store.ts
-widgets/<widget-slice>/model/index.ts
-```
-
-If a widget needs server data, get it from `entities/` or `features/`.
-
-### `features/`
-
-Use `features/` for a user action with business value.
-
-Examples:
-
-- `auth-by-email`;
-- `change-password`;
-- `create-order`;
-- `delete-comment`;
-- `toggle-favorite`;
-- `upload-avatar`.
-
-A feature may own:
-
-- feature UI;
-- feature-specific form state;
-- feature mutation API;
-- feature validation schemas;
-- feature-specific store;
-- feature-specific hooks.
-
-Create a feature slice only when the action is reusable or has meaningful business logic. If the action is used once and is tightly bound to one page, keep it inside that page until reuse appears.
-
-### `entities/`
-
-Use `entities/` for domain objects.
-
-Examples:
-
-- `user`;
-- `profile`;
-- `article`;
-- `comment`;
-- `order`;
-- `product`.
-
-An entity may own:
-
-- entity type/model;
-- entity schemas;
-- entity API for reading or updating the entity itself;
-- entity store;
-- reusable entity UI representation;
-- domain selectors and pure domain logic.
-
-Do not put user-action flows into `entities/`. If the code represents an action, put it into `features/`.
-
-### `shared/`
-
-Use `shared/` only for code without business ownership.
-
-Allowed examples:
-
-```txt
-shared/ui/
-shared/lib/
-shared/api/
-shared/config/
-shared/model/
-shared/i18n/
-shared/assets/
-```
-
-`shared/model` is allowed only for global or cross-cutting state that is not better owned by an entity or feature.
-
-`shared/api` is for the base API client, transport helpers, shared request primitives, and generic API utilities. Domain endpoints do not belong in `shared/api`.
-
-## Naming
-
-Use `kebab-case` for slice folder names under:
-
-```txt
-pages/
-widgets/
-features/
-entities/
-```
-
-Correct:
-
-```txt
-pages/not-found/
-widgets/user-menu/
-features/auth-by-email/
-entities/user-profile/
-```
-
-Wrong:
-
-```txt
-pages/notFound/
-widgets/UserMenu/
-features/authByEmail/
-entities/UserProfile/
-```
-
-Under slice `ui/`, use the same kebab-case stem for the folder and the `.tsx` file:
-
-```txt
-pages/home/ui/home/home.tsx
-pages/not-found/ui/not-found/not-found.tsx
-widgets/user-menu/ui/user-menu/user-menu.tsx
-features/auth-by-email/ui/auth-by-email-form/auth-by-email-form.tsx
-entities/user/ui/user-card/user-card.tsx
-```
-
-The exported React component identifier stays `PascalCase`:
-
-```ts
-export function UserCard() {}
-```
-
-Use these file naming rules:
-
-```txt
-*.tsx                  React components only
-*.schema.ts            Valibot schemas only
-use-<name>.ts          React hooks
-<name>.store.ts        Only when there are multiple stores in one segment; otherwise store.ts
-<name>.test.ts         Tests
-<name>.spec.ts         Specs if the project uses spec naming
-constants.ts           Slice constants
-query-keys.ts          TanStack Query keys
-requests/index.ts      Aggregated API request object
-```
-
-Avoid vague names:
-
-```txt
-helpers.ts
-utils.ts
-misc.ts
-data.ts
-common.ts
-```
-
-Use names that describe the responsibility:
-
-```txt
-format-price.ts
-normalize-user.ts
-get-user-display-name.ts
-build-user-query-key.ts
-```
-
-## Slice structure
-
-A slice is a folder directly inside `pages/`, `widgets/`, `features/`, or `entities/`.
-
-Default slice shape:
-
-```txt
-<layer>/<slice>/
-  index.ts
-  ui/
-  model/
-  api/
-  lib/
-  config/
-  assets/
-```
-
-Do not create all folders by default. Create only the segments that are actually needed.
-
-### Minimal UI-only slice
-
-```txt
-widgets/user-menu/
-  index.ts
-  ui/
-    user-menu/
-      user-menu.tsx
-  model/
-    schemas/
-      user-menu.schema.ts
-```
-
-### Entity slice with API and model
-
-```txt
-entities/user/
-  index.ts
-  api/
-    requests/
-      get-current-user.ts
-      index.ts
-    query-keys.ts
-    use-current-user.ts
-  model/
-    schemas/
-      user.schema.ts
-    constants.ts
-    selectors.ts
-    store.ts
-    types.ts
-  ui/
-    user-card/
-      user-card.tsx
-```
-
-### Feature slice with mutation
-
-```txt
-features/update-profile/
-  index.ts
-  api/
-    requests/
-      index.ts
-      update-profile.ts
-    use-update-profile.ts
-  model/
-    schemas/
-      update-profile-form.schema.ts
-    constants.ts
-    types.ts
-  ui/
-    update-profile-form/
-      update-profile-form.tsx
-```
-
-## Segment usage inside a slice
-
-### `ui/`
-
-Use `ui/` for React components and component-local presentation code.
-
-Allowed inside `ui/`:
-
-```txt
-ui/<component>/<component>.tsx
-ui/<component>/<component>.module.scss
-ui/<component>/<component>.test.tsx
-ui/<component>/<small-child-component>.tsx
-```
-
-Rules:
-
-- Components must focus on rendering and user interaction wiring.
-- Business logic must be moved to `model/`, `api/`, `lib/`, `entities/`, or `features/` depending on ownership.
-- Non-trivial calculations must not live directly in JSX.
-- Component props must come from `model/schemas/*.schema.ts` for slices under `pages/`, `widgets/`, `features/`, and `entities/`.
-- Components import slice schemas, types, constants, hooks, and API hooks from the slice public API: `@/<layer>/<slice>`.
-- Components must not deep-import from `@/<layer>/<slice>/model/...` or `@/<layer>/<slice>/api/...`.
-
-### `model/`
-
-Use `model/` for the slice contract and slice-owned state or business rules.
-
-Create `model/` when at least one of these is true:
-
-- the slice has component props schemas;
-- the slice has form/input validation schemas;
-- the slice owns domain types;
-- the slice owns state;
-- the slice has selectors;
-- the slice has constants used by multiple files inside the slice;
-- the slice has domain-specific hooks that are not HTTP hooks;
-- the slice has slice-specific i18n resources;
-- the slice has pure domain rules or predicates.
-
-Do not create `model/` only because every slice “should have it”.
-
-Allowed `model/` files and folders:
-
-```txt
-model/schemas/<name>.schema.ts
-model/constants.ts
-model/types.ts
-model/store.ts
-model/selectors.ts
-model/use-<name>.ts
-model/guards.ts
-model/mappers.ts
-model/locales/
-```
-
-#### `model/schemas/`
-
-Use `model/schemas/` for Valibot schemas.
-
-Use schemas for:
-
-- component props;
-- form values;
-- API input/output validation when owned by the slice;
-- route/search params when owned by a page;
-- domain object validation.
-
-Schema file naming:
-
-```txt
-model/schemas/<kebab-stem>.schema.ts
-```
-
-For a component located here:
-
-```txt
-ui/user-card/user-card.tsx
-```
-
-The matching props schema should be here:
-
-```txt
-model/schemas/user-card.schema.ts
-```
-
-The schema file exports both the schema and the props type:
-
-```ts
-import { type InferOutput, object, optional, string } from "valibot";
-
-export const userCardPropsSchema = object({
-  className: optional(string()),
-});
-
-export type UserCardProps = InferOutput<typeof userCardPropsSchema>;
-```
-
-Do not define component prop types directly in `.tsx` if a schema file is required.
-
-#### `model/constants.ts`
-
-Use `model/constants.ts` for slice constants used by multiple files or exported as part of the slice contract.
-
-Good examples:
-
-```ts
-export const USERNAME_MIN_LENGTH = 3;
-export const USERNAME_MAX_LENGTH = 32;
-```
-
-Do not put one-off local constants into `model/constants.ts`. Keep them near the only usage site.
-
-#### `model/types.ts`
-
-Use `model/types.ts` for domain or slice-level TypeScript types that are not directly inferred from Valibot schemas.
-
-Allowed:
-
-```ts
-export type UserStatus = "active" | "blocked";
-export type UserPermission = "read" | "write" | "admin";
-```
-
-Do not duplicate types that can be inferred from schemas.
-
-#### `model/store.ts`
-
-Use `model/store.ts` only when the slice owns real state.
-
-Allowed owners:
-
-```txt
-entities/<slice>/model/store.ts
-features/<slice>/model/store.ts
-shared/model/...
-```
-
-Forbidden owners:
-
-```txt
-pages/<slice>/model/store.ts
-widgets/<slice>/model/store.ts
-app/**/model/store.ts
-```
-
-Use `store.ts` for:
-
-- client-only domain state;
-- feature flow state;
-- cross-component state with a clear owner;
-- state that cannot be represented by URL, server cache, or local component state.
-
-Do not use `store.ts` for:
-
-- derived values;
-- duplicated server data;
-- temporary state used by one component only;
-- page composition state;
-- TanStack Query server cache.
-
-#### `model/selectors.ts`
-
-Use `model/selectors.ts` for derived reads from `model/store.ts` or domain state.
-
-Selectors must be pure. They must not perform IO, mutate data, or call React hooks.
-
-#### `model/use-<name>.ts`
-
-Use `model/use-<name>.ts` for React hooks that belong to the slice model but are not HTTP hooks.
-
-Allowed examples:
-
-```txt
-model/use-selected-user.ts
-model/use-update-profile-form.ts
-model/use-user-permissions.ts
-```
-
-Use model hooks for:
-
-- combining store selectors;
-- form model logic;
-- domain-specific UI state orchestration;
-- reusable business interaction logic that does not call the server directly.
-
-Do not put TanStack Query hooks into `model/`. Server-state hooks belong to `api/use-<operation>.ts`.
-
-Do not create `model/hooks/`. Hook files live directly in `model/` as `use-<name>.ts`.
-
-#### `model/guards.ts`
-
-Use `model/guards.ts` for type guards and domain predicates.
-
-Example:
-
-```ts
-export function isActiveUser(status: UserStatus): boolean {
-  return status === "active";
-}
-```
-
-#### `model/mappers.ts`
-
-Use `model/mappers.ts` only for pure transformations between slice-owned model shapes.
-
-If the mapper exists only to convert transport DTOs from an API response, prefer `api/mappers.ts`.
-
-#### `model/locales/`
-
-Use `model/locales/` only for slice-specific translations that are owned by the slice and not reused globally.
-
-Global i18n setup and generic translation helpers belong to `shared/i18n` or `shared/lib`, depending on the project structure.
-
-#### Forbidden in `model/`
-
-```txt
-model/index.ts
-model/hooks/
-model/lib/
-model/helpers.ts
-model/utils.ts
-model/api.ts
-```
-
-The slice public model API must be exported from the slice root `index.ts`, not from `model/index.ts`.
-
-### `api/`
-
-Use `api/` for server communication owned by an entity or feature.
-
-Allowed owners:
-
-```txt
-entities/<slice>/api/
-features/<slice>/api/
-```
-
-Usually forbidden:
-
-```txt
-pages/<slice>/api/
-widgets/<slice>/api/
-app/**/api/
-```
-
-Allowed in `shared/api`:
-
-```txt
-shared/api/client.ts
-shared/api/http.ts
-shared/api/errors.ts
-shared/api/types.ts
-```
-
-Domain endpoints must not live in `shared/api`.
-
-Generated OpenAPI transport artifacts are the exception to this ownership
-rule. Orval output belongs in `shared/api/generated` because it is generated
-infrastructure, not a hand-written domain slice.
-
-### Generated API usage
-
-- Treat the OpenAPI document and Orval output as the source of truth for API
-  operations and transport DTOs.
-- Run `pnpm api:generate` after the OpenAPI document changes.
-- Never edit files under `shared/api/generated` manually.
-- Use generated Solid Query primitives and generated request functions instead
-  of duplicating endpoints with `fetch`, `apiRequest`, or another HTTP client.
-- Import generated operations into the owning `entities/<slice>/api` or
-  `features/<slice>/api` segment. Re-export only the slice contract through the
-  slice root `index.ts`.
-- Add a hand-written entity or feature API wrapper only when domain mapping,
-  validation, query invalidation, or composition is required.
-- Keep `shared/api/index.ts` limited to the Orval fetch mutator, authentication,
-  normalized transport errors, and generic transport types.
-
-Preferred API structure:
-
-```txt
+```text
+ui/
+model/
 api/
-  requests/
-    <operation>.ts
-    index.ts
-  query-keys.ts
-  use-<operation>.ts
-  types.ts
-  mappers.ts
+lib/
+config/
 ```
 
-#### `api/requests/<operation>.ts`
+Create only the segments and files that are needed now. Do not add `.gitkeep`, empty barrels, placeholder folders, or symmetrical scaffolding.
 
-Use request files for low-level server calls.
+File names describe responsibility. Avoid vague names such as `helpers.ts`, `utils.ts`, `data.ts`, and `common.ts`.
 
-Request files may:
+## Public APIs and imports
 
-- call the shared API client;
-- validate request and response data;
-- map DTOs to domain models;
-- throw typed errors or normalized errors.
+Every real slice under `pages`, `widgets`, `features`, or `entities` exposes a small intentional public API from its root `index.ts`.
 
-Request files must not:
-
-- use React hooks;
-- know about components;
-- mutate UI state;
-- import from pages or widgets.
-
-#### `api/requests/index.ts`
-
-Use `api/requests/index.ts` to export an aggregated `requests` object when the project uses this pattern.
-
-Example:
+Across slices, import through that public API:
 
 ```ts
-import { getCurrentUser } from "./get-current-user";
-
-export const requests = {
-  getCurrentUser,
-};
+import { HomePage } from "@/pages/home";
 ```
 
-#### `api/use-<operation>.ts`
-
-Use `api/use-<operation>.ts` for TanStack Query hooks or mutation hooks.
-
-Examples:
-
-```txt
-api/use-current-user.ts
-api/use-update-profile.ts
-api/use-delete-comment.ts
-```
-
-API hooks may:
-
-- call `requests` from `./requests`;
-- use `query-keys.ts`;
-- expose loading/error/data states;
-- invalidate related queries;
-- compose TanStack Query options.
-
-API hooks must not contain UI rendering logic.
-
-#### `api/query-keys.ts`
-
-Use `api/query-keys.ts` for TanStack Query keys owned by the slice.
-
-Query keys must be stable, typed when practical, and colocated with the slice that owns the server state.
-
-#### `api/types.ts`
-
-Use `api/types.ts` for transport-level request/response types if they are not already inferred from schemas.
-
-Do not mix transport DTO types with domain model types. Domain types belong to `model/types.ts`.
-
-#### `api/mappers.ts`
-
-Use `api/mappers.ts` for DTO-to-domain and domain-to-DTO conversions that exist because of transport shape differences.
-
-### `lib/`
-
-Use slice `lib/` only for pure implementation details owned by the slice.
-
-Allowed:
-
-```txt
-lib/format-user-name.ts
-lib/sort-comments.ts
-lib/build-form-default-values.ts
-```
-
-Rules:
-
-- `lib/` functions must be pure whenever possible.
-- `lib/` must not import from `ui/`.
-- `lib/` must not become a dumping ground.
-- If logic is reusable across different slices and has no business ownership, move it to `shared/lib`.
-- If logic is business-owned by an entity or feature, keep it in that slice.
-
-### `config/`
-
-Use slice `config/` for static configuration owned by the slice.
-
-Examples:
-
-```txt
-config/table-columns.ts
-config/form-fields.ts
-config/tabs.ts
-```
-
-Do not put runtime state into `config/`.
-
-### `assets/`
-
-Use slice `assets/` for assets owned only by this slice.
-
-Reusable assets belong to `shared/assets`.
-
-## State ownership
-
-State includes:
-
-- `model/store.ts`;
-- store selectors;
-- TanStack Query server state;
-- domain cache;
-- feature flow state;
-- stateful business hooks.
-
-Ownership priority:
-
-1. `entities/` — domain object state and entity server data.
-2. `features/` — action/flow state and feature mutations.
-3. `shared/model` — global cross-cutting state only when no entity or feature owns it.
-
-Do not create domain state in:
-
-```txt
-app/
-pages/
-widgets/
-```
-
-Use local component state only for local UI concerns:
-
-- opened/closed local dropdown;
-- local input draft before submit;
-- local hover/focus state;
-- local uncontrolled UI state.
-
-Do not duplicate server data into client store. Use TanStack Query for server data and derive values from the query result.
-
-## Public API
-
-Every slice must expose its public API through the slice root `index.ts`.
-
-Example:
-
-```txt
-entities/user/index.ts
-features/update-profile/index.ts
-widgets/user-menu/index.ts
-pages/home/index.ts
-```
-
-Consumers outside the slice must import from the root public API:
+Do not deep-import another slice:
 
 ```ts
-import { UserCard, useCurrentUser } from "@/entities/user";
+import { HomePage } from "@/pages/home/ui/home";
 ```
 
-Do not deep-import from another slice:
+Inside the same slice or shared module, use relative imports and do not import the module through its own public API. This prevents hidden cycles.
 
-```ts
-// Wrong
-import { UserCard } from "@/entities/user/ui/user-card/user-card";
-import { useCurrentUser } from "@/entities/user/api/use-current-user";
+Use the `@/*` alias for cross-boundary source imports. Do not introduce alternative source aliases without updating TypeScript, Vite, lint, tests, and documentation together.
+
+Public APIs must use explicit exports. Avoid `export *` and do not expose implementation details. `app` segments do not need artificial barrel files.
+
+## Same-layer dependencies and `@x`
+
+Do not import one page, widget, or feature slice from another slice on the same layer. Compose them in a higher layer or reconsider ownership.
+
+For entity-to-entity dependencies, first try to merge incorrectly split entities, move technical code to `shared`, or compose above the entity layer. Use an entity `@x` API only as a documented last resort for an unavoidable domain relationship.
+
+## API and server state
+
+The OpenAPI document and Orval output are transport sources of truth. Generated files belong in `shared/api/generated` and must never be edited manually.
+
+Generated operations may be consumed by the page that exclusively owns the use case. Extract them into an entity or feature only when domain ownership, reuse, mapping, validation, invalidation, or composition justifies it. Do not duplicate generated endpoints with hand-written `fetch` calls.
+
+Keep `shared/api/index.ts` limited to the Orval mutator, authentication, normalized transport errors, and generic transport types. Use TanStack Solid Query for server state; do not copy server data into client stores.
+
+## State and validation
+
+Keep local UI and route-specific state with the page or component that owns it. Move state down only when a stable feature or entity owns its lifecycle. Prefer URL state for shareable navigation state and Solid Query for server state.
+
+Use Valibot at external or persisted boundaries: environment variables, route/search input, forms, API data when generated types are insufficient, and storage data. Do not create runtime schemas for purely internal props without a validation requirement.
+
+## Moving and deleting code
+
+Before a move:
+
+1. search all usages and imports;
+2. identify the actual owner;
+3. move the implementation and update the destination public API;
+4. replace external deep imports with public API imports;
+5. remove old exports, files, and empty directories;
+6. search for stale paths, reverse imports, same-layer imports, and cycles;
+7. preserve runtime behavior and type safety.
+
+Never keep old and new structures in parallel without a concrete compatibility need. Never edit generated API files or the lockfile for an architecture-only change.
+
+## Automated enforcement
+
+`pnpm run validate:steiger` enforces the repository's FSD boundaries through the existing Steiger configuration. ESLint and TypeScript enforce import and type correctness. Do not add a heavy architecture dependency while these checks cover the required boundaries.
+
+## Required validation
+
+At the end of every task run:
+
+```text
+pnpm run validate
 ```
 
-Root `index.ts` section order is required:
-
-```ts
-/* model */
-export { userSchema, type User } from "./model/schemas/user.schema";
-export { USERNAME_MAX_LENGTH, USERNAME_MIN_LENGTH } from "./model/constants";
-export { useUserStore } from "./model/store";
-
-/* api */
-export { requests } from "./api/requests";
-export { useCurrentUser } from "./api/use-current-user";
-
-/* ui */
-export { UserCard } from "./ui/user-card/user-card";
-```
-
-Rules for `index.ts`:
-
-- use relative imports only;
-- never use `@/` inside `index.ts`;
-- export `model` first;
-- export `api` second when it exists;
-- export `ui` last;
-- keep one blank line between sections;
-- export only the real public contract;
-- do not export internal helpers by default.
-
-## Imports inside a slice
-
-Inside `index.ts`, always use relative paths.
-
-Inside non-`index.ts` files under `src/`:
-
-- use relative import for nearby files;
-- use `@/` when the relative path would be long or cross architectural boundaries;
-- use the slice public API for schema/types/constants/hooks from the same slice when importing from `ui/` or `api/`.
-
-From `ui/`:
-
-```ts
-// Correct
-import { type UserCardProps } from "@/entities/user";
-
-// Wrong
-import { type UserCardProps } from "../../model/schemas/user-card.schema";
-```
-
-From `api/use-<operation>.ts`:
-
-```ts
-// Correct
-import { requests } from "./requests";
-import { userQueryKeys } from "./query-keys";
-import { type User } from "@/entities/user";
-```
-
-Do not import from `ui/` into `model/`, `api/`, `lib/`, or `config/`.
-
-## File creation rules
-
-When creating a new file, follow this process.
-
-### 1. Define the owner
-
-Ask:
-
-```txt
-Is it app setup?
-Is it a page?
-Is it a reusable page block?
-Is it a user action?
-Is it a domain entity?
-Is it generic shared code?
-```
-
-The first matching answer defines the layer.
-
-### 2. Reuse existing slices first
-
-Before creating a new slice, search for:
-
-- same domain entity;
-- same feature action;
-- same page;
-- similar widget;
-- existing shared utility or UI component.
-
-Create a new slice only when existing ownership would be incorrect.
-
-### 3. Create only required segments
-
-Do not scaffold every segment.
-
-If you only need a page component:
-
-```txt
-pages/home/
-  index.ts
-  ui/home/home.tsx
-  model/schemas/home.schema.ts
-```
-
-If you add server data later, do not add it to the page. Create or extend an entity/feature API instead.
-
-### 4. Keep one responsibility per file
-
-Create a new file when the code has a separate reason to change.
-
-Good reasons:
-
-- separate component;
-- separate request;
-- separate schema;
-- separate store;
-- separate hook;
-- separate pure domain function.
-
-Bad reasons:
-
-- “file became 80 lines”; length alone is not enough;
-- “maybe reusable later”;
-- “to match a template”.
-
-### 5. Update public API
-
-After creating a public file, export it from the slice root `index.ts`.
-
-Do not export private files.
-
-### 6. Fix imports
-
-After adding a file:
-
-- use public API imports across slices;
-- avoid deep imports;
-- avoid upward imports;
-- remove unused imports;
-- preserve import order used by the project.
-
-## File update rules
-
-When editing existing code:
-
-1. Keep the file in its current owner if ownership is still correct.
-2. If logic no longer belongs there, move it to the right layer before extending it.
-3. Do not add business logic to UI just because the UI file is currently open.
-4. Do not add server calls to pages or widgets.
-5. Do not add a store to pages or widgets.
-6. Do not duplicate existing schemas, constants, query keys, or types.
-7. Prefer narrowing and reusing existing contracts over creating parallel contracts.
-
-## Moving files
-
-Move a file when its ownership changed or was wrong.
-
-Safe move process:
-
-1. Identify the new owner layer and slice.
-2. Move the file to the correct segment.
-3. Rename the file if the new segment requires another naming convention.
-4. Update the new slice root `index.ts` if the file is public.
-5. Remove old exports from the previous `index.ts`.
-6. Replace consumers with public API imports.
-7. Delete empty folders.
-8. Run typecheck/tests/lint if available.
-
-When moving between layers, check import direction again. A moved file may no longer be allowed to import the same modules.
-
-On case-insensitive file systems, do not rename only by case in one step. Use a temporary name so Git records the change.
-
-## Deleting files
-
-Delete a file only when it has no valid owner or usage.
-
-Before deleting:
-
-1. Search all imports/usages.
-2. Remove public API exports.
-3. Remove related tests only if they test deleted behavior.
-4. Delete empty folders.
-5. Do not leave dead barrels or empty segments.
-
-Do not keep unused files “just in case”.
-
-## Pages and HTML props
-
-For page components, page props should support valid HTML attributes for the root element when the project follows this pattern.
-
-Schema file:
-
-```txt
-pages/<page>/model/schemas/<page>.schema.ts
-```
-
-Rules:
-
-- export the page schema;
-- export `PageNameProps` from the schema file;
-- include `AllHTMLAttributes<HTMLElement>` when page root HTML props are forwarded;
-- omit colliding framework prop names with `Omit<AllHTMLAttributes<HTMLElement>, 'key'>` when needed;
-- do not forward framework-only props to the DOM.
-
-In the page component:
-
-- destructure framework props in the parameter list;
-- collect HTML props into `...html`;
-- spread `html` onto one root HTMLElement.
-
-## Shared UI and app component schemas
-
-For `shared/ui` and `app`, colocate component schemas next to the component.
-
-Correct:
-
-```txt
-shared/ui/button/button.tsx
-shared/ui/button/button.schema.ts
-
-app/layouts/root-layout/root-layout.tsx
-app/layouts/root-layout/root-layout.schema.ts
-```
-
-Do not create `model/schemas/` for `shared/ui` or `app` components.
-
-## Validation
-
-Use Valibot schemas at boundaries:
-
-- component props;
-- forms;
-- API request bodies;
-- API responses;
-- route/search params;
-- persisted external data.
-
-Do not duplicate schema-derived types manually. Prefer `InferOutput<typeof schema>`.
-
-## Anti-patterns
-
-Avoid these patterns:
-
-```txt
-pages/<page>/api/
-widgets/<widget>/api/
-pages/<page>/model/store.ts
-widgets/<widget>/model/store.ts
-model/index.ts
-model/hooks/
-model/lib/
-shared/api/<domain-endpoint>.ts
-deep imports from another slice
-same-layer slice imports
-business logic inside .tsx
-server data copied into client store
-new folders created only for symmetry
-```
-
-## Examples
-
-### Add a user card
-
-User card is a domain representation of `user`.
-
-Correct location:
-
-```txt
-entities/user/ui/user-card/user-card.tsx
-entities/user/model/schemas/user-card.schema.ts
-entities/user/index.ts
-```
-
-### Add a profile page
-
-Profile page is a route screen.
-
-Correct location:
-
-```txt
-pages/profile/ui/profile/profile.tsx
-pages/profile/model/schemas/profile.schema.ts
-pages/profile/index.ts
-```
-
-If the profile page needs user data, use `entities/user/api/*`, not `pages/profile/api/*`.
-
-### Add update profile form
-
-Updating a profile is a user action.
-
-Correct location:
-
-```txt
-features/update-profile/ui/update-profile-form/update-profile-form.tsx
-features/update-profile/model/schemas/update-profile-form.schema.ts
-features/update-profile/api/requests/update-profile.ts
-features/update-profile/api/requests/index.ts
-features/update-profile/api/use-update-profile.ts
-features/update-profile/index.ts
-```
-
-### Add generic price formatter
-
-If it is not domain-bound:
-
-```txt
-shared/lib/format-price.ts
-```
-
-If it is product-specific and uses product domain rules:
-
-```txt
-entities/product/lib/format-product-price.ts
-```
-
-## Final checklist
-
-Before finishing a structure-related change, verify:
-
-1. The layer is selected by the architecture questions.
-2. The slice name is `kebab-case`.
-3. Only necessary folders were created.
-4. UI files are under `ui/<stem>/<stem>.tsx`.
-5. Slice schemas are under `model/schemas/` when the slice belongs to `pages`, `widgets`, `features`, or `entities`.
-6. `shared/ui` and `app` schemas are colocated with components.
-7. Domain state lives only in `entities`, `features`, or truly global `shared/model`.
-8. API belongs to `entities` or `features`, not `pages` or `widgets`.
-9. TanStack Query hooks are in `api/use-<operation>.ts`, not in `model/`.
-10. There is no `model/index.ts`.
-11. The slice root `index.ts` exports public API in the order: `model`, `api`, `ui`.
-12. Consumers use public API imports, not deep imports.
-13. Imports do not go up the FSD hierarchy.
-14. No unused files, folders, exports, or dead abstractions remain.
+For structural work also run a production build and any test scripts present in `package.json`. Search imports manually after moves; a successful build alone is not proof that architectural boundaries are clean.

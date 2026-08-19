@@ -1,10 +1,10 @@
 import { type RouteDefinition } from "@solidjs/router";
 
-import { Home } from "@/pages/home";
+import { HomePage } from "@/pages/home";
 
 export const routes: RouteDefinition[] = [
   {
     path: "/",
-    component: Home,
+    component: HomePage,
   },
 ];

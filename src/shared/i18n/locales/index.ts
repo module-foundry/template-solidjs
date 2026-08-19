@@ -7,4 +7,3 @@ export const dictionaries = {
 };
 
 export type Locales = keyof typeof dictionaries;
-export type Dict = typeof enDict;

@@ -1,6 +1,13 @@
-import { defineConfig } from "vite";
+import { fileURLToPath } from "node:url";
+import { defineConfig, loadEnv } from "vite";
 
-export default defineConfig(async ({ command }) => {
+import { parseEnv } from "./src/shared/lib/env-validation";
+
+const PROJECT_ROOT = fileURLToPath(new URL(".", import.meta.url));
+
+export default defineConfig(async ({ mode, command }) => {
+  parseEnv(loadEnv(mode, PROJECT_ROOT, "VITE_"));
+
   const useProdConfig = command === "build";
   const configModule = useProdConfig
     ? await import("./vite/prod.config")
