@@ -34,9 +34,12 @@ export default (): InlineConfig => {
     appType: "spa",
     publicDir: "public",
     resolve: {
-      alias: {
-        "@": fileURLToPath(new URL("../src", import.meta.url)),
-      },
+      alias: [
+        {
+          find: /^@\//,
+          replacement: fileURLToPath(new URL("../src/", import.meta.url)),
+        },
+      ],
     },
     css: {
       transformer: "lightningcss",
