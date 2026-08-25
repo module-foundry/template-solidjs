@@ -92,9 +92,16 @@ Create an entity for a stable domain concept with independent ownership or reusa
 - `api` owns the base fetch mutator, authentication headers, normalized HTTP errors, transport types, and generated transport code;
 - `config` owns validated environment and cross-cutting static configuration;
 - `i18n` owns the generic localization runtime and dictionaries;
-- `ui` and `lib` should be created only when real reusable primitives exist.
+- `ui` and `lib` should be created only when real reusable primitives exist;
+- `assets` owns static assets, grouped by media type and exported from its public API.
 
 Shared code must not mention product-specific users, products, orders, checkout flows, pages, features, or entities.
+
+### Static assets
+
+Keep static application assets in `src/shared/assets`. Group them by type: raster images in `images/`, icons in `icons/`, videos in `videos/`, and other media in a clearly named directory that matches its type.
+
+Expose assets only through explicit exports from `src/shared/assets/index.ts`. Name every export `ObjectName` followed by the singular asset type: `TileOldImage`, `PlusIcon`, `AddIcon`, and `CatVideo` are valid examples. Pages and lower-layer slices must not colocate static asset files.
 
 ## Semantic segments
 
