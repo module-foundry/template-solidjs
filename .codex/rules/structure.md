@@ -22,6 +22,12 @@ app -> pages -> widgets -> features -> entities -> shared
 
 Dependencies only point from a higher layer to a lower layer. `shared` must never import from a business layer. Slices on the same layer are independent by default.
 
+## Static assets
+
+Store all static application assets in `src/shared/assets`. Organize them by media type: `images/` for raster images, `icons/` for icons, `videos/` for video files, and additional clearly named type directories when needed.
+
+`src/shared/assets/index.ts` is the only public import point for these files. Export each asset explicitly and name its export as `ObjectName` plus the singular asset type, for example `TileOldImage`, `PlusIcon`, `AddIcon`, or `CatVideo`. Do not colocate asset files in pages, widgets, features, or entities.
+
 ## Classify before creating or moving code
 
 Ask these questions in order:
