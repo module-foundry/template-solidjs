@@ -40,8 +40,8 @@ importers:
         specifier: ^0.7.0
         version: 0.7.0(@typescript/typescript6@6.0.2)
       '@module-foundry/configs':
-        specifier: ^0.0.4
-        version: 0.0.4(9bbb02ccf9d33056bd2654e6832474b0)
+        specifier: ^0.0.5
+        version: 0.0.5(9bbb02ccf9d33056bd2654e6832474b0)
       '@stylistic/eslint-plugin':
         specifier: ^5.10.0
         version: 5.10.0(eslint@9.39.5(jiti@2.7.0)(supports-color@10.2.2))
@@ -867,8 +867,8 @@ packages:
   '@keyv/serialize@1.1.1':
     resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
 
-  '@module-foundry/configs@0.0.4':
-    resolution: {integrity: sha512-EakU9KWpuneEJLU+LcIGF/04utRoyVmPLcH02vh4e5C6rXzvHBh8J3degyy5rNn4XHLG/1oR3l8W7hOlQXBBsA==}
+  '@module-foundry/configs@0.0.5':
+    resolution: {integrity: sha512-6uubcJ0TRmkHWpKbUrG4sQBCfcZo9MjxgfPQyoyyd/7rrzG/rfghWXKrVkg0xxUuy6t/gBDOsXHMpdZSmyHn/Q==}
     engines: {node: '>=24.18.0', pnpm: '>=11.18.0'}
     peerDependencies:
       '@commitlint/cli': ^21.2.1
@@ -2154,6 +2154,7 @@ packages:
   eslint@9.39.5:
     resolution: {integrity: sha512-DgZS62aPLXKlnxILS/AYCoRvHaZeXceIzlXPkkGGzJWSow1aEk0lbTlxUSlyjC8jcaKxAdOnTDz+o1JFSBsyjw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -4222,7 +4223,7 @@ snapshots:
 
   '@keyv/serialize@1.1.1': {}
 
-  '@module-foundry/configs@0.0.4(9bbb02ccf9d33056bd2654e6832474b0)':
+  '@module-foundry/configs@0.0.5(9bbb02ccf9d33056bd2654e6832474b0)':
     optionalDependencies:
       '@commitlint/cli': 21.2.2(@types/node@24.13.2)(@typescript/typescript6@6.0.2)(conventional-commits-parser@7.1.2)
       '@commitlint/config-conventional': 21.2.2

@@ -3,7 +3,7 @@ allowBuilds:
   esbuild: true
   sharp: true
 minimumReleaseAgeExclude:
-  - "@module-foundry/configs@0.0.4"
+  - '@module-foundry/configs@0.0.4 || 0.0.5'
 peerDependencyRules:
   allowedVersions:
     "tsconfck>typescript": ">=6.0.2 <8.0.0"

@@ -18,6 +18,7 @@ export default defineConfig({
       mode: "tags-split",
       httpClient: "fetch",
       client: "solid-query",
+      namingConvention: "kebab-case",
       target: "./src/shared/api/generated/api.ts",
       schemas: "./src/shared/api/generated/models",
       override: {

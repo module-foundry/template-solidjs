@@ -59,7 +59,7 @@
     "@eslint-community/eslint-plugin-eslint-comments": "^4.7.2",
     "@eslint/js": "^9.39.5",
     "@feature-sliced/steiger-plugin": "^0.7.0",
-    "@module-foundry/configs": "^0.0.4",
+    "@module-foundry/configs": "^0.0.5",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/node": "^24.13.2",
     "browserslist": "^4.28.4",
