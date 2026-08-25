@@ -40,6 +40,7 @@
 
 - Keep global styles under `src/app/styles` and colocate slice-specific styles with their UI owner.
 - Follow Stylelint and the existing SCSS conventions.
+- Keep static assets in `src/shared/assets`, grouped by media type. Import them through its explicit `index.ts` exports, named `ObjectName` plus the singular asset type, such as `TileOldImage` or `AddIcon`.
 - Never manually edit `src/shared/api/generated`, lockfiles, build output, or other generated artifacts.
 
 ## Required checks
