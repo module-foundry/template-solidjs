@@ -1,0 +1,67 @@
+.note-form {
+  display: grid;
+  align-items: end;
+
+  gap: var(--padding-middle);
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.note-form__label {
+  display: grid;
+
+  font-size: var(--subheadline-2-font-size);
+  font-weight: var(--font-weight-accent-2);
+  gap: var(--padding-small);
+}
+
+.note-form__input {
+  width: 100%;
+  padding: var(--padding-middle);
+
+  background: var(--secondary);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-small);
+  color: var(--text-primary);
+
+  &[aria-invalid="true"] {
+    border-color: var(--danger);
+  }
+}
+
+.note-form__submit {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: var(--padding-middle) var(--padding-large);
+
+  background: var(--accent);
+  border: 1px solid transparent;
+  border-radius: var(--radius-small);
+  color: var(--on-accent);
+
+  font-weight: var(--font-weight-accent-2);
+  gap: var(--padding-small);
+
+  &:hover {
+    background: var(--accent-hover);
+  }
+}
+
+.note-form__icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.note-form__error {
+  color: var(--danger);
+
+  font-size: var(--caption-1-font-size);
+  grid-column: 1 / -1;
+}
+
+@media (width <= 36rem) {
+  .note-form {
+    grid-template-columns: 1fr;
+  }
+}

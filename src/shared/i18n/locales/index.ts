@@ -1,9 +1,8 @@
-import { enDict } from "./en";
+import { type Locale } from "@/shared/config";
+import { type Dict, enDict } from "./en";
 import { ruDict } from "./ru";
 
 export const dictionaries = {
   en: enDict,
   ru: ruDict,
-};
-
-export type Locales = keyof typeof dictionaries;
+} satisfies Record<Locale, Dict>;

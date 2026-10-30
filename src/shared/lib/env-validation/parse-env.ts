@@ -1,6 +1,6 @@
 import { safeParse } from "valibot";
 
-import { envSchema, type Env } from "./env.schema";
+import { type Env, envSchema } from "./env.schema";
 
 export const parseEnv = (values: unknown): Env => {
   const result = safeParse(envSchema, values);

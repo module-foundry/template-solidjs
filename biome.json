@@ -1,0 +1,129 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+  "files": {
+    "includes": [
+      "**",
+      "!**/src/shared/api/generated",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/build",
+      "!**/coverage"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "useEditorconfig": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 80,
+    "lineEnding": "lf"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "double",
+      "jsxQuoteStyle": "double",
+      "semicolons": "always",
+      "arrowParentheses": "always",
+      "trailingCommas": "all"
+    }
+  },
+  "json": {
+    "formatter": {
+      "trailingCommas": "none"
+    }
+  },
+  "html": {
+    "formatter": { "enabled": false },
+    "linter": { "enabled": false }
+  },
+  "css": {
+    "linter": { "enabled": false }
+  },
+  "linter": {
+    "enabled": true,
+    "domains": {
+      "solid": "all",
+      "react": "none"
+    },
+    "rules": {
+      "preset": "recommended",
+      "complexity": {
+        "useFlatMap": "error",
+        "useSimplifiedLogicExpression": "error",
+        "noExtraBooleanCast": "error",
+        "useOptionalChain": "error",
+        "noUselessTernary": "error",
+        "useLiteralKeys": "error",
+        "noExcessiveCognitiveComplexity": {
+          "level": "error",
+          "options": { "maxAllowedComplexity": 15 }
+        }
+      },
+      "correctness": {
+        "noSolidDestructuredProps": "error",
+        "noUnusedImports": "error",
+        "noUnusedVariables": "error",
+        "noUnusedFunctionParameters": "error"
+      },
+      "performance": {
+        "useSolidForComponent": "error"
+      },
+      "style": {
+        "useBlockStatements": "error",
+        "useConst": "error",
+        "noParameterAssign": "error",
+        "noUselessElse": "error",
+        "useImportType": {
+          "level": "error",
+          "options": { "style": "inlineType" }
+        }
+      },
+      "suspicious": {
+        "noReactSpecificProps": "error",
+        "noDuplicateJsxProps": "error",
+        "noDuplicatedSpreadProps": "error",
+        "noExplicitAny": "error",
+        "noDoubleEquals": {
+          "level": "error",
+          "options": { "ignoreNull": false }
+        },
+        "noVar": "error"
+      }
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "sortBareImports": false,
+            "groups": [
+              ["**/*.css", "**/*.scss"],
+              ":BLANK_LINE:",
+              ["solid-js", "solid-js/**"],
+              ["@solidjs/**", "solid-*"],
+              ":PACKAGE:",
+              ":BLANK_LINE:",
+              ":NODE:",
+              ":BLANK_LINE:",
+              [":ALIAS:", ":PATH:"]
+            ]
+          }
+        }
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["src/**/*.{js,jsx,ts,tsx}"],
+      "linter": { "rules": { "suspicious": { "noConsole": "error" } } }
+    }
+  ]
+}

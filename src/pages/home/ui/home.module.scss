@@ -1,0 +1,138 @@
+.home {
+  width: min(100%, var(--content-width));
+  padding: calc(var(--padding-large) * 3) var(--padding-large);
+
+  margin-inline: auto;
+}
+
+.home__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  flex-wrap: wrap;
+  gap: var(--padding-large);
+}
+
+.home__eyebrow {
+  color: var(--text-secondary);
+
+  font-size: var(--caption-1-font-size);
+}
+
+.home__title {
+  font-size: var(--large-title-font-size);
+  font-weight: var(--font-weight-accent-1);
+  line-height: 1.2;
+  margin-block-start: var(--padding-small);
+}
+
+.home__intro {
+  color: var(--text-secondary);
+
+  margin-block: var(--padding-large) calc(var(--padding-large) * 2);
+}
+
+.home__panel {
+  padding: calc(var(--padding-middle) * 2);
+
+  background: var(--secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-middle);
+}
+
+.home__heading {
+  font-size: var(--headline-font-size);
+  font-weight: var(--font-weight-accent-2);
+  margin-block-end: var(--padding-large);
+}
+
+.home__toolbar {
+  display: flex;
+  justify-content: space-between;
+
+  color: var(--text-secondary);
+
+  flex-wrap: wrap;
+  font-size: var(--caption-1-font-size);
+  gap: var(--padding-middle);
+  margin-block: calc(var(--padding-middle) * 2);
+}
+
+.home__filter,
+.home__check {
+  display: flex;
+  align-items: center;
+
+  gap: var(--padding-small);
+}
+
+.home__list {
+  display: grid;
+
+  padding: 0;
+  margin: 0;
+
+  gap: var(--padding-small);
+  list-style: none;
+}
+
+.home__note {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  border-block-start: 1px solid var(--border);
+  gap: var(--padding-middle);
+  padding-block: var(--padding-small);
+}
+
+.home__check {
+  min-width: 0;
+}
+
+.home__text {
+  overflow-wrap: anywhere;
+}
+
+.home__note[data-completed="true"] .home__text {
+  color: var(--text-secondary);
+
+  text-decoration: line-through;
+}
+
+.home__remove {
+  padding: var(--padding-small);
+
+  border-radius: var(--radius-small);
+  color: var(--text-secondary);
+
+  &:hover {
+    background: var(--background);
+    color: var(--danger);
+  }
+}
+
+.home__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.home__empty {
+  color: var(--text-secondary);
+
+  padding-block: var(--padding-large);
+}
+
+.home__hint {
+  color: var(--text-secondary);
+
+  font-size: var(--caption-1-font-size);
+  margin-block-start: var(--padding-large);
+}
+
+@media (width <= 36rem) {
+  .home__panel {
+    padding: var(--padding-large);
+  }
+}

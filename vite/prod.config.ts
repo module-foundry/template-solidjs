@@ -1,20 +1,33 @@
 import generateScopedName from "mini-css-class-name/postcss-modules";
-import path from "node:path";
 import { defineConfig } from "vite";
+import { compression } from "vite-plugin-compression2";
 
-import defaultConfig from "./default.config";
+import path from "node:path";
 
 import { compilerOptions } from "../tsconfig.json";
+import defaultConfig from "./default.config";
 
 export default () => {
   const baseConfig = defaultConfig();
+  const isCompress = process.env.BUILD_COMPRESS === "true";
 
   return defineConfig({
     ...baseConfig,
     base: "/",
+    plugins: [
+      ...(baseConfig.plugins ?? []),
+      isCompress &&
+        compression({
+          threshold: 0,
+          deleteOriginalAssets: false,
+          skipIfLargerOrEqual: false,
+          algorithms: ["gzip", "brotliCompress"],
+          include:
+            /\.(xml|css|json|js|ts|mjs|svg|yaml|yml|toml|html|txt|woff|woff2|ttf|eot)$/,
+        }),
+    ],
     css: {
       ...baseConfig.css,
-      transformer: "postcss",
       modules: {
         generateScopedName: generateScopedName(),
       },
@@ -34,9 +47,8 @@ export default () => {
         },
         compress: {
           passes: 5,
-          drop_console: true,
+          drop_console: ["log", "info", "debug"],
           drop_debugger: true,
-          pure_funcs: ["console.log", "console.info", "console.debug"],
         },
       },
       rollupOptions: {

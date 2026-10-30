@@ -1,0 +1,17 @@
+.locale-select {
+  display: grid;
+
+  color: var(--text-secondary);
+
+  font-size: var(--caption-1-font-size);
+  gap: var(--padding-smallest);
+}
+
+.locale-select__control {
+  padding: var(--padding-small) var(--padding-middle);
+
+  background: var(--secondary);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-small);
+  color: var(--text-primary);
+}

@@ -1,6 +1,13 @@
 {
-  "src/**/*.{js,jsx,ts,tsx}": "eslint --max-warnings=0 --fix",
-  "src/**/*.{css,sass,scss}": "stylelint --fix",
-  "{src,vite}/**/*.{js,jsx,ts,tsx,json,css,scss,md,html,mjs}": "prettier --write",
-  "*.{js,ts,mjs,json,md}": "prettier --write"
+  "**/*.{js,jsx,ts,tsx,mjs,cjs,mts,cts}": "biome check --write --error-on-warnings --no-errors-on-unmatched",
+  "**/*.{json,jsonc,graphql,gql}": "biome check --write --error-on-warnings --no-errors-on-unmatched",
+  "src/**/*.css": [
+    "stylelint --fix --max-warnings=0",
+    "biome check --write --error-on-warnings --no-errors-on-unmatched"
+  ],
+  "src/**/*.{scss,sass}": [
+    "stylelint --fix --max-warnings=0",
+    "prettier --write"
+  ],
+  "**/*.{md,yaml,yml,html}": "prettier --write"
 }

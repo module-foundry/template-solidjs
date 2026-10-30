@@ -3,11 +3,20 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-COPY package.json pnpm-lock.yaml ./
+ENV HUSKY=0
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install --frozen-lockfile
 
 COPY . .
-RUN pnpm run build:compress
+
+ARG VITE_API_URL
+ARG VITE_APP_SETTING_LS_AUTH_KEY=accessToken
+ARG VITE_I18N_FALLBACK_LNG=en
+ARG VITE_I18N_SUPPORTED_LOCALES=en,ru
+ARG VITE_I18N_STORAGE_KEY=lang
+
+RUN pnpm run build:production
 
 FROM nginx:stable-alpine
 COPY --from=builder /app/dist /usr/share/nginx/html

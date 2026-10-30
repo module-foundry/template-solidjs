@@ -1,6 +1,12 @@
-import config from "@module-foundry/configs/prettier";
-
+/** @type {import("prettier").Config} */
 export default {
-  ...config,
-  endOfLine: "auto",
+  semi: true,
+  tabWidth: 2,
+  useTabs: false,
+  singleQuote: false,
+  jsxSingleQuote: false,
+  arrowParens: "always",
+  trailingComma: "all",
+  printWidth: 80,
+  endOfLine: "lf",
 };

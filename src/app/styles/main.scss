@@ -1,3 +1,7 @@
-body {
-  overflow-x: hidden;
-}
+@use "./abstracts/reset-style";
+@use "./variables/colors";
+@use "./variables/font";
+@use "./variables/layout";
+@use "./variables/safe-area";
+@use "./variables/spacing";
+@use "./abstracts/default";

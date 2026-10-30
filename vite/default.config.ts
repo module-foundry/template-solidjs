@@ -1,31 +1,22 @@
 import browserslist from "browserslist";
 import { browserslistToTargets } from "lightningcss";
-import { fileURLToPath } from "node:url";
 import { type InlineConfig } from "vite";
 import { analyzer } from "vite-bundle-analyzer";
-import { compression } from "vite-plugin-compression2";
 import { ViteImageOptimizer } from "vite-plugin-image-optimizer";
 import { ViteMinifyPlugin } from "vite-plugin-minify";
 import solid from "vite-plugin-solid";
-import svgr from "vite-plugin-svgr";
+import solidSvg from "vite-plugin-solid-svg";
+
+import { fileURLToPath } from "node:url";
 
 export default (): InlineConfig => {
-  const isCompress = process.env.BUILD_COMPRESS === "true";
   const isAnalyze = process.env.BUILD_ANALYZE === "true";
 
   const plugins = [
     solid(),
-    svgr(),
+    solidSvg({ defaultAsComponent: true }),
     ViteImageOptimizer(),
     ViteMinifyPlugin(),
-    isCompress &&
-      compression({
-        threshold: 0,
-        deleteOriginalAssets: false,
-        algorithms: ["gzip", "brotliCompress"],
-        include:
-          /\.(xml|css|json|js|ts|mjs|svg|yaml|yml|toml|html|txt|woff|woff2|ttf|eot)$/,
-      }),
     isAnalyze && analyzer(),
   ].filter(Boolean);
 
@@ -42,7 +33,11 @@ export default (): InlineConfig => {
       ],
     },
     css: {
-      transformer: "lightningcss",
+      transformer: "postcss",
+      devSourcemap: true,
+      modules: {
+        generateScopedName: "[path][name]__[local]",
+      },
       lightningcss: {
         targets: browserslistToTargets(
           browserslist(undefined, { env: "production" }),

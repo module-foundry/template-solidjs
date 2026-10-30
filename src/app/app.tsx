@@ -1,16 +1,10 @@
+import { type Component } from "solid-js";
 import { Router } from "@solidjs/router";
-import { QueryClient, QueryClientProvider } from "@tanstack/solid-query";
 
 import { routes } from "./routes";
 
-const queryClient = new QueryClient();
-
-const App = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Router>{routes}</Router>
-    </QueryClientProvider>
-  );
+const App: Component = () => {
+  return <Router>{routes}</Router>;
 };
 
 export default App;

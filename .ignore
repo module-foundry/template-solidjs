@@ -1,0 +1,7 @@
+# Keep Git-ignored local context available to AI search tools.
+!/task.md
+!/plan.md
+!/template/
+!/template/**
+!/temp/
+!/temp/**

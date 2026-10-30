@@ -1,5 +1,6 @@
-import { fileURLToPath } from "node:url";
 import { defineConfig, loadEnv } from "vite";
+
+import { fileURLToPath } from "node:url";
 
 import { parseEnv } from "./src/shared/lib/env-validation";
 

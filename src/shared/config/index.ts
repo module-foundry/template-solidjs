@@ -1,2 +1,2 @@
 export { env } from "./env";
-export { LOCALES } from "./i18n";
+export { AVAILABLE_LOCALES, type Locale } from "./i18n";

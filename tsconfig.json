@@ -1,19 +1,44 @@
 {
-  "extends": "@module-foundry/configs/solidjs/typescript",
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "exactOptionalPropertyTypes": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "moduleResolution": "Bundler",
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noEmit": true,
     "outDir": "./dist",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "types": ["vite/client", "node"]
+    "rootDir": ".",
+    "paths": { "@/*": ["./src/*"] },
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2024",
+    "types": [
+      "vite-plugin-solid-svg/types-component-solid",
+      "vite/client",
+      "node"
+    ],
+    "useUnknownInCatchVariables": true,
+    "verbatimModuleSyntax": true
   },
   "include": [
-    "orval.config.ts",
+    "kubb.config.ts",
     "vite.config.ts",
     "vite/**/*.ts",
-    "tsconfig.json",
     "src",
-    "src/**/*.d.ts",
     "types/**/*.d.ts"
   ],
   "exclude": ["node_modules", "dist"]

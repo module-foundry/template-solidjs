@@ -1,1 +1,4 @@
-export { default } from "@module-foundry/configs/commitlint";
+/** @type {import("@commitlint/types").UserConfig} */
+export default {
+  extends: ["@commitlint/config-conventional"],
+};

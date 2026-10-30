@@ -1,10 +1,10 @@
 /* @refresh reload */
 import "./styles/main.scss";
 
+import { createComponent } from "solid-js";
 import { render } from "solid-js/web";
 
 import { i18n } from "@/shared/i18n";
-
 import App from "./app";
 
 const root = document.getElementById("root");
@@ -16,4 +16,4 @@ if (!(root instanceof HTMLElement)) {
 }
 
 i18n.parseLocale();
-render(App, root);
+render(() => createComponent(App, {}), root);
